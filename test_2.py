@@ -4,21 +4,16 @@ import torch.optim as optim
 import torch.nn.functional as F
 import pandas as pd 
 
+
+### Importation de la base de données
+
 database = pd.read_csv("D:\MOI\CentraleSupelec\Cours CS\Projet - Modélisation mathématiques\Test\Detection-de-fraudes\labelled_database.tsv", sep="\t")
+
+### Création du trainset et du testset
 
 trainset = []             
 testset = []
 
-"""#for i in range(50) : 
-#    l1=[]
-#    l2=[]
-#     print(float(database.loc[i]["income"]))
-    l1.append(float(database[str(i)]["income"]))
-    l1.append(float(database[str(i)]["taxclass"]))
-    l2.append(float(database[str(50+i)]["income"]))
-    l2.append(float(database[str(50+i)]["taxclass"]))
-    trainset.append((torch.tensor([l1]), torch.tensor([database[str(i)]["fraud"]])))
-    testset.append((torch.tensor([l2]), torch.tensor([database[str(50+i)]["fraud"]])))"""
 
 traindata = database.loc[1:50]
 testdata = database.loc[50:100]
@@ -35,7 +30,7 @@ for i in range(50) :
 
 
 
-
+### Début duu réseau de neurones
 
 
 
@@ -60,14 +55,13 @@ class Net(nn.Module) :
 
 
 net = Net() 
-#X = torch.rand((1,2))
-#X = X.view(-1, 1*2)
-#output = net(X) 
-#print(output)
+
+### Début de l'entraînement
 
 optimizer = optim.Adam(net.parameters(), lr =0.001)
 
-#Le nombre de fois qu'on va parcourir le trainset pour entrainer notre algo 
+# Le nombre de fois qu'on va parcourir le trainset pour entrainer notre algo 
+
 EPOCHS = 5
 
 for epoch in range(EPOCHS) : 
@@ -79,6 +73,8 @@ for epoch in range(EPOCHS) :
         loss.backward() 
         optimizer.step() 
     print(loss)
+
+### Début des mesures de performance
 
 correct = 0 
 total = 0 
@@ -95,7 +91,9 @@ with torch.no_grad() :
 print("Accuracy: ", round(correct/total, 3))
 
 
-X = torch.tensor([2000., 50000.])
+### Test sur un cas 
+
+X = torch.tensor([50000., 50000.])
 X = X.view(-1, 1*2)
 output = net(X) 
 print(output)
