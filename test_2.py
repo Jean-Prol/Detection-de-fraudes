@@ -9,15 +9,33 @@ database = pd.read_csv("D:\MOI\CentraleSupelec\Cours CS\Projet - Modélisation m
 trainset = []             
 testset = []
 
-for i in range(50) : 
-    l1=[]
-    l2=[]
+"""#for i in range(50) : 
+#    l1=[]
+#    l2=[]
+#     print(float(database.loc[i]["income"]))
     l1.append(float(database[str(i)]["income"]))
     l1.append(float(database[str(i)]["taxclass"]))
     l2.append(float(database[str(50+i)]["income"]))
     l2.append(float(database[str(50+i)]["taxclass"]))
     trainset.append((torch.tensor([l1]), torch.tensor([database[str(i)]["fraud"]])))
-    testset.append((torch.tensor([l2]), torch.tensor([database[str(50+i)]["fraud"]])))
+    testset.append((torch.tensor([l2]), torch.tensor([database[str(50+i)]["fraud"]])))"""
+
+traindata = database.loc[1:50]
+testdata = database.loc[50:100]
+trainincome = list(traindata["income"])
+traintaxclass = list(traindata["taxclass"])
+trainfraud = list(traindata["fraud"])
+testincome = list(testdata["income"])
+testtaxclass = list(testdata["taxclass"])
+testfraud = list(testdata["fraud"])
+
+for i in range(50) : 
+    trainset.append((torch.tensor([[float(trainincome[i]), float(traintaxclass[i])]]), torch.tensor([trainfraud[i]])))
+    testset.append((torch.tensor([[float(testincome[i]), float(testtaxclass[i])]]), torch.tensor([testfraud[i]])))
+
+
+
+
 
 
 
@@ -77,7 +95,7 @@ with torch.no_grad() :
 print("Accuracy: ", round(correct/total, 3))
 
 
-X = torch.tensor([20800., 50000.])
+X = torch.tensor([2000., 50000.])
 X = X.view(-1, 1*2)
 output = net(X) 
 print(output)
