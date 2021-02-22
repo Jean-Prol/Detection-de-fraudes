@@ -7,7 +7,7 @@ import pandas as pd
 
 ### Importation de la base de données
 
-database = pd.read_csv("D:\MOI\CentraleSupelec\Cours CS\Projet - Modélisation mathématiques\Test\Detection-de-fraudes\labelled_database.tsv", sep="\t")
+database = pd.read_csv("/Users/jeanprolhac/Desktop/Projet/Projet 16 - IA et fraude/Detection-de-fraudes/labelled_database.tsv", sep="\t")
 
 ### Création du trainset et du testset
 
@@ -24,7 +24,7 @@ testincome = list(testdata["income"])
 testtaxclass = list(testdata["taxclass"])
 testfraud = list(testdata["fraud"])
 
-for i in range(50) : 
+for i in range(len(trainincome)) : 
     trainset.append((torch.tensor([[float(trainincome[i]), float(traintaxclass[i])]]), torch.tensor([trainfraud[i]])))
     testset.append((torch.tensor([[float(testincome[i]), float(testtaxclass[i])]]), torch.tensor([testfraud[i]])))
 
