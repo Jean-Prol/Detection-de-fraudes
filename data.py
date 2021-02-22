@@ -2,10 +2,12 @@ import numpy as np
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from sklearn.naive_bayes import GaussianNB
+import pandas as pd
 
 prop=0.577
 loca=1-prop
 
+cat_list = ["cadre", "profession intermédiaire", "employé", "ouvrier", "chef d'entreprise", "agriculteur"]
 patri={"cadre":392100,"profession intermédiaire":221400, "employé":123300,
              'ouvrier':112200,"chef d'entreprise":547400,'agriculteur':1040000}
 
@@ -42,7 +44,8 @@ def generate_salaire(n) :
     
     return categorie, salaire,expenses,patrimoine
 
-cat,sal,ex,pat=generate_salaire(500)
+cat,sal,ex,pat=generate_salaire(5500)
+cat_m=[cat_list[elem] for elem in cat]
 
 """
 X = np.array([[sal[i],ex[i],cat[i],pat[i]] for i in range (len(pat))])
@@ -56,6 +59,6 @@ label=clf.predict(X)
 
 """
 
+df = pd.DataFrame(list(zip(cat_m, sal, ex, pat)), columns=["catégorie", "salaire", "dépenses", "patrimoine"])
     
-    
-    
+df.to_csv('new_data_big.tsv', sep = '\t')
