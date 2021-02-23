@@ -100,20 +100,20 @@ data_catm=[[],[],[],[],[],[]]
 
 for i in range(len(data_cat)):
     elem=data_cat[i]
-    if elem=="cadre":
+    if elem==0:
         data_catm[0].append(i)
-    elif elem=="profession intermédiaire":
+    elif elem==1:
         data_catm[1].append(i)
-    elif elem=="employé":
+    elif elem==2:
         data_catm[2].append(i)
-    elif elem=="ouvrier":
+    elif elem==3:
         data_catm[3].append(i)
-    elif elem=="chef d'entreprise":
+    elif elem==4:
         data_catm[4].append(i)
     else:
         data_catm[5].append(i)
 
-def tracer_donnees(cat):
+def affichage_indicateur1(cat):
     X = [data_sal[i] for i in data_catm[cat]]
     Y = [data_pat[i] for i in data_catm[cat]]
     Z = [data_dep[i] for i in data_catm[cat]]
@@ -140,15 +140,15 @@ def tracer_donnees(cat):
     af2 = AnnoteFinder(X,Z,data_catm[cat], xtol=1000, ytol=1000)
     fig.canvas.mpl_connect('button_press_event', af2)
     linkAnnotationFinders([af1, af2])
-    fig.suptitle("Catégorie socio-professionnelle : {}".format(cat_list[cat]))
+    fig.suptitle("Catégorie socio-professionnelle : {} – Indicateur 1".format(cat_list[cat]))
     plt.show()
 
-#tracer_donnees(1)
+#affichage_indicateur1(1)
 
 ## Premier critère : on sélectionne les personnes qui ont un patrimoine élevé par rapport à la moyenne, 
 ## (au-dessus de la ligne rouge) tout en dépensant plus que ce qu'elles gagnent !
 
-def clusterise(cat):
+def clusterise_indicateur1(cat):
     X = [data_sal[i] for i in data_catm[cat]]
     Y = [data_pat[i] for i in data_catm[cat]]
     Z = [data_dep[i] for i in data_catm[cat]]
@@ -177,11 +177,11 @@ def clusterise(cat):
     fig.suptitle("Catégorie socio-professionnelle : {} – Indicateur 1".format(cat_list[cat]))
     plt.show()
 
-#clusterise(3)
+#clusterise_indicateur1(3)
 
 ## Deuxième critère : on sélectionne les personnes qui dépensent plus que la moyenne
 
-def affichage2(cat):
+def affichage_indicateur23(cat):
     X = [data_sal[i] for i in data_catm[cat]]
     Y = [data_pat[i] for i in data_catm[cat]]
     Z = [data_dep[i] for i in data_catm[cat]]
@@ -226,12 +226,12 @@ def affichage2(cat):
     af3 = AnnoteFinder(X,Z,data_catm[cat], xtol=1000, ytol=1000)
     fig.canvas.mpl_connect('button_press_event', af3)
     linkAnnotationFinders([af1, af2, af3])
-    fig.suptitle("Catégorie socio-professionnelle : {}".format(cat_list[cat]))
+    fig.suptitle("Catégorie socio-professionnelle : {} – Indicateurs 2 et 3".format(cat_list[cat]))
     plt.show()
 
-#affichage2(4)
+#affichage_indicateur23(4)
 
-def clusterise2(cat):
+def clusterise_indicateur23(cat):
     X = [data_sal[i] for i in data_catm[cat]]
     Y = [data_pat[i] for i in data_catm[cat]]
     Z = [data_dep[i] for i in data_catm[cat]]
@@ -286,7 +286,58 @@ def clusterise2(cat):
     fig.suptitle("Catégorie socio-professionnelle : {}".format(cat_list[cat]))
     plt.show()
 
-#clusterise2(3)
+#clusterise_indicateur23(1)
+
+## Paramètres de l'ellipse : a et b
+
+def affichage_indicateur4(cat):
+    X = [data_sal[i] for i in data_catm[cat]]
+    Y = [data_pat[i] for i in data_catm[cat]]
+    M = [i for i in range(int(min(X)), int(max(X))+1)]
+    moy_X = sum(X)/len(X)
+    moy_Y = sum(Y)/len(Y)
+    a = (int(max(X))+1-int(min(X)))/1.5
+    b = (max(Y)-moy_Y)*0.6
+    K = []
+    for i in M:
+        if 1-((i-(moy_X*1.2))**2)/(a**2)>=0:
+            K.append(moy_Y+((1-((i-(moy_X*1.2))**2)/(a**2))*b**2)**0.5)
+        else:
+            K.append(moy_Y)
+    fig, ax = plt.subplots()
+    ax1 = plt.subplot(121)
+    ax1.scatter([moy_X for _ in range(int(min(Y)), int(max(Y)+1))], [i for i in range(int(min(Y)), int(max(Y))+1)], label="Salaire moyen")
+    ax1.scatter(M, [moy_Y for _ in range(int(min(X)), int(max(X))+1)], label="Patrimoine moyen")
+    ax1.scatter(X, Y)
+    ax1.scatter(M, K, label="Ratio limite")
+    ax1.set_xlabel("Salaire")
+    ax1.set_ylabel("Patrimoine")
+    ax1.legend()
+    af1 = AnnoteFinder(X,Y,data_catm[cat], xtol=1000, ytol=1000)
+    fig.canvas.mpl_connect('button_press_event', af1)
+    i_val = []
+    for i in range(len(X)):
+        if 1-((X[i]-(moy_X*1.2))**2)/(a**2)>=0:
+            if Y[i]>moy_Y+((1-((X[i]-(moy_X*1.2))**2)/(a**2))*b**2)**0.5:
+                i_val.append(i)
+        else:
+            if Y[i]>moy_Y:
+                i_val.append(i)
+    ax2 = plt.subplot(122)
+    ax2.scatter(X,Y, label="Non fraudeur")
+    ax2.scatter([X[i] for i in i_val], [Y[i] for i in i_val], label="Fraudeur")
+    ax2.set_xlabel("Salaire")
+    ax2.set_ylabel("Patrimoine")
+    ax2.legend()
+    af2 = AnnoteFinder(X,Y,data_catm[cat], xtol=1000, ytol=1000)
+    axprev = plt.axes([0.53, 0.02, 0.14, 0.04])
+    TextBox(axprev, '', initial="{}/{} fraudeurs ({}%)".format(len(i_val), len(X), int(100*len(i_val)/len(X))))
+    fig.canvas.mpl_connect('button_press_event', af2)
+    linkAnnotationFinders([af1, af2])
+    fig.suptitle("Catégorie socio-professionnelle : {} – Indicateur 4".format(cat_list[cat]))
+    plt.show()
+
+#affichage_indicateur4(4)
 
 def indicateur1():
     V = []
@@ -296,7 +347,6 @@ def indicateur1():
         Z = [data_dep[i] for i in data_catm[cat]]
         moy_X = sum(X)/len(X)
         moy_Y = sum(Y)/len(Y)
-        n=0
         for i in range(len(X)):
             if Y[i]>=(max(Y)-((max(Y)-moy_Y)/10)-moy_Y)/(max(X)-min(X))*(X[i]-min(X))+ moy_Y:
                 if Z[i]>=X[i]:
@@ -329,7 +379,6 @@ def indicateur2():
     print(sum(V))
     return V
 
-
 def indicateur3():
     V = []
     for cat in range(len(cat_list)):
@@ -350,8 +399,75 @@ def indicateur3():
     print(sum(V))
     return V
 
-database["Indicateur 1"]=indicateur1()
-database["Indicateur 2"]=indicateur2()
-database["Indicateur 3"]=indicateur3()
+def indicateur4():
+    V = []
+    for cat in range(len(cat_list)):
+        X = [data_sal[i] for i in data_catm[cat]]
+        Y = [data_pat[i] for i in data_catm[cat]]
+        M = [i for i in range(int(min(X)), int(max(X))+1)]
+        moy_X = sum(X)/len(X)
+        moy_Y = sum(Y)/len(Y)
+        a = (int(max(X))+1-int(min(X)))/1.5
+        b = (max(Y)-moy_Y)*0.6
+        i_val = []
+        for i in range(len(X)):
+            if 1-((X[i]-(moy_X*1.2))**2)/(a**2)>=0:
+                if Y[i]>moy_Y+((1-((X[i]-(moy_X*1.2))**2)/(a**2))*b**2)**0.5:
+                    V.append(1)
+                else:
+                    V.append(0)
+            else:
+                if Y[i]>moy_Y:
+                    V.append(1)
+                else:
+                    V.append(0)
+    print(sum(V))
+    return V
 
-database.to_csv('new_data_big.tsv', sep = '\t')
+def labellisation():
+    database["Indicateur 1"] = indicateur1()
+    database["Indicateur 2"] = indicateur2()
+    database["Indicateur 3"] = indicateur3()
+    database["Indicateur 4"] = indicateur4()
+    database.to_csv('new_data_big.tsv', sep = '\t')
+
+labellisation()
+
+def synthese_indicateur():
+    fig, ax = plt.subplots()
+    ax1 = plt.subplot(221)
+    i1 = indicateur1()
+    ax1.scatter(data_sal, data_pat, label="Non fraudeur")
+    ax1.scatter([data_sal[i] for i in range(len(i1)) if i1[i]==1], [data_pat[i] for i in range(len(i1)) if i1[i]==1], label="Fraudeur")
+    ax1.set_xlabel("Salaire")
+    ax1.set_ylabel("Patrimoine")
+    ax1.legend()
+    ax1.set_title("Indicateur 1 ({}%)".format(int(100*(sum(i1)/len(i1)))), loc="right")
+    ax2 = plt.subplot(222)
+    i2 = indicateur2()
+    ax2.scatter(data_sal, data_pat, label="Non fraudeur")
+    ax2.scatter([data_sal[i] for i in range(len(i1)) if i2[i]==1], [data_pat[i] for i in range(len(i1)) if i2[i]==1], label="Fraudeur")
+    ax2.set_xlabel("Salaire")
+    ax2.set_ylabel("Patrimoine")
+    ax2.legend()
+    ax2.set_title("Indicateur 2 ({}%)".format(int(100*sum(i2)/len(i2))), loc="right")
+    ax3 = plt.subplot(223)
+    i3 = indicateur3()
+    ax3.scatter(data_sal, data_pat, label="Non fraudeur")
+    ax3.scatter([data_sal[i] for i in range(len(i1)) if i3[i]==1], [data_pat[i] for i in range(len(i1)) if i3[i]==1], label="Fraudeur")
+    ax3.set_xlabel("Salaire")
+    ax3.set_ylabel("Patrimoine")
+    ax3.legend()
+    ax3.set_title("Indicateur 3 ({}%)".format(int(100*sum(i3)/len(i3))), loc="right")
+    ax4 = plt.subplot(224)
+    i4 = indicateur4()
+    ax4.scatter(data_sal, data_pat, label="Non fraudeur")
+    ax4.scatter([data_sal[i] for i in range(len(i1)) if i4[i]==1], [data_pat[i] for i in range(len(i1)) if i4[i]==1], label="Fraudeur")
+    ax4.set_xlabel("Salaire")
+    ax4.set_ylabel("Patrimoine")
+    ax4.legend()
+    ax4.set_title("Indicateur 4 ({}%)".format(int(100*sum(i4)/len(i4))), loc="right")
+    fig.suptitle("Synthèse des indicateurs")
+    plt.show()
+
+#synthese_indicateur()

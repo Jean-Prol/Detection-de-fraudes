@@ -59,6 +59,6 @@ label=clf.predict(X)
 
 """
 
-df = pd.DataFrame(list(zip(cat_m, sal, ex, pat)), columns=["catégorie", "salaire", "dépenses", "patrimoine"])
+df = pd.DataFrame(list(zip(cat, sal, ex, pat)), columns=["catégorie", "salaire", "dépenses", "patrimoine"])
     
 df.to_csv('new_data_big.tsv', sep = '\t')
