@@ -44,7 +44,7 @@ def generate_salaire(n) :
     
     return categorie, salaire,expenses,patrimoine
 
-cat,sal,ex,pat=generate_salaire(5500)
+cat,sal,ex,pat=generate_salaire(6000)
 cat_m=[cat_list[elem] for elem in cat]
 
 """

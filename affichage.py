@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.cluster import KMeans
+from matplotlib.widgets import TextBox
 import pandas as pd
 import math 
 import numpy as np
@@ -89,7 +90,7 @@ cat_list = ["cadre", "profession intermédiaire", "employé", "ouvrier", "chef d
 
 database = pd.read_csv("/Users/jeanprolhac/Desktop/Projet/Projet 16 - IA et fraude/Detection-de-fraudes/new_data_big.tsv", sep="\t")
 
-data = database.loc[1:5500]
+data = database.loc[0:5972]
 data_cat = list(data["catégorie"])
 data_sal = list(data["salaire"])
 data_dep = list(data["dépenses"])
@@ -124,7 +125,7 @@ def tracer_donnees(cat):
     ax1.scatter([moy_X for _ in range(int(min(Y)), int(max(Y)+1))], [i for i in range(int(min(Y)), int(max(Y))+1)], label="Salaire moyen")
     ax1.scatter(M, [moy_Y for _ in range(int(min(X)), int(max(X))+1)], label="Patrimoine moyen")
     ax1.scatter(X, Y)
-    ax1.scatter(M, [(((max(Y)-(max(Y)-moy_Y)/10)-(moy_Y-(moy_Y-min(Y))/10))/(max(X)-min(X))*(i-min(X)))+(moy_Y-(moy_Y-min(Y))/10) for i in range(int(min(X)), int(max(X))+1)], label="Ratio limite")
+    ax1.scatter(M, [(max(Y)-((max(Y)-moy_Y)/10)-moy_Y)/(max(X)-min(X))*(i-min(X))+ moy_Y for i in range(int(min(X)), int(max(X))+1)], label="Ratio limite")
     ax1.set_xlabel("Salaire")
     ax1.set_ylabel("Patrimoine")
     ax1.legend()
@@ -142,7 +143,7 @@ def tracer_donnees(cat):
     fig.suptitle("Catégorie socio-professionnelle : {}".format(cat_list[cat]))
     plt.show()
 
-tracer_donnees(0)
+#tracer_donnees(1)
 
 ## Premier critère : on sélectionne les personnes qui ont un patrimoine élevé par rapport à la moyenne, 
 ## (au-dessus de la ligne rouge) tout en dépensant plus que ce qu'elles gagnent !
@@ -155,7 +156,7 @@ def clusterise(cat):
     moy_Y = sum(Y)/len(Y)
     i_val = []
     for i in range(len(X)):
-        if Y[i]>=((max(Y)-((moy_Y-(max(Y)-moy_Y)/10)-(moy_Y-min(Y))/10))/(max(X)-min(X))*(X[i]-min(X)))+(moy_Y-(moy_Y-min(Y))/10):
+        if Y[i]>=(max(Y)-((max(Y)-moy_Y)/10)-moy_Y)/(max(X)-min(X))*(X[i]-min(X))+ moy_Y:
             if Z[i]>=X[i]:
                 i_val.append(i)
     fig, ax = plt.subplots()
@@ -170,11 +171,13 @@ def clusterise(cat):
     ax2.scatter([X[i] for i in i_val], [Z[i] for i in i_val], label="Fraudeur")
     ax2.set_xlabel("Salaire")
     ax2.set_ylabel("Dépenses")
+    axprev = plt.axes([0.53, 0.02, 0.14, 0.04])
+    TextBox(axprev, '', initial="{}/{} fraudeurs ({}%)".format(len(i_val), len(X), int(100*len(i_val)/len(X))))
     ax2.legend()
-    fig.suptitle("Catégorie socio-professionnelle : {}".format(cat_list[cat]))
+    fig.suptitle("Catégorie socio-professionnelle : {} – Indicateur 1".format(cat_list[cat]))
     plt.show()
 
-#clusterise(0)
+#clusterise(3)
 
 ## Deuxième critère : on sélectionne les personnes qui dépensent plus que la moyenne
 
@@ -226,7 +229,7 @@ def affichage2(cat):
     fig.suptitle("Catégorie socio-professionnelle : {}".format(cat_list[cat]))
     plt.show()
 
-#affichage2(0)
+#affichage2(4)
 
 def clusterise2(cat):
     X = [data_sal[i] for i in data_catm[cat]]
@@ -243,10 +246,10 @@ def clusterise2(cat):
     i_val = []
     i_val2 = []
     for i in range(len(X)):
-        if N[i]>moy_N+0.35*(max(N)+moy_N):
+        if N[i]>moy_N+0.35*(max(N)+moy_N) and N[i]>0:
             if Y[i]<moy_Y-0.35*(moy_Y-min(Y)):
                 i_val.append(i)
-        if N[i]>quant:
+        if N[i]>quant and N[i]>0:
             if Y[i]<quant2:
                 i_val2.append(i)
     fig, ax = plt.subplots()
@@ -255,19 +258,21 @@ def clusterise2(cat):
     ax1.set_ylabel("Patrimoine")
     ax1.scatter(X,Y, label="Non fraudeur")
     ax1.scatter([X[i] for i in i_val], [Y[i] for i in i_val], label="Fraudeur")
-    ax1.title.set_text("Indicateur 1")
+    ax1.title.set_text("Indicateur 2")
     ax1.legend()
     ax2 = plt.subplot(223)
     ax2.set_xlabel("Salaire")
     ax2.set_ylabel("Dépenses")
     ax2.scatter(X,Z, label="Non fraudeur")
     ax2.scatter([X[i] for i in i_val], [Z[i] for i in i_val], label="Fraudeur")
+    axprev1 = plt.axes([0.1, 0.02, 0.14, 0.04])
+    TextBox(axprev1, '', initial="{}/{} fraudeurs ({}%)".format(len(i_val), len(X), int(100*len(i_val)/len(X))))
     ax2.legend()
     ax3 = plt.subplot(222)
     ax3.set_xlabel("Salaire")
     ax3.set_ylabel("Patrimoine")
     ax3.scatter(X,Y, label="Non fraudeur")
-    ax3.title.set_text("Indicateur 2")
+    ax3.title.set_text("Indicateur 3")
     ax3.scatter([X[i] for i in i_val2], [Y[i] for i in i_val2], label="Fraudeur")
     ax3.legend()
     ax4 = plt.subplot(224)
@@ -275,8 +280,78 @@ def clusterise2(cat):
     ax4.set_ylabel("Dépenses")
     ax4.scatter(X,Z, label="Non fraudeur")
     ax4.scatter([X[i] for i in i_val2], [Z[i] for i in i_val2], label="Fraudeur")
+    axprev = plt.axes([0.53, 0.02, 0.14, 0.04])
+    TextBox(axprev, '', initial="{}/{} fraudeurs ({}%)".format(len(i_val2), len(X), int(100*len(i_val2)/len(X))))
     ax4.legend()
     fig.suptitle("Catégorie socio-professionnelle : {}".format(cat_list[cat]))
     plt.show()
 
-#clusterise2(1)
+#clusterise2(3)
+
+def indicateur1():
+    V = []
+    for cat in range(len(cat_list)):
+        X = [data_sal[i] for i in data_catm[cat]]
+        Y = [data_pat[i] for i in data_catm[cat]]
+        Z = [data_dep[i] for i in data_catm[cat]]
+        moy_X = sum(X)/len(X)
+        moy_Y = sum(Y)/len(Y)
+        n=0
+        for i in range(len(X)):
+            if Y[i]>=(max(Y)-((max(Y)-moy_Y)/10)-moy_Y)/(max(X)-min(X))*(X[i]-min(X))+ moy_Y:
+                if Z[i]>=X[i]:
+                    V.append(1)
+                else:
+                    V.append(0)
+            else:
+                V.append(0)
+    print(sum(V))
+    return V
+
+def indicateur2():
+    V = []
+    for cat in range(len(cat_list)):
+        X = [data_sal[i] for i in data_catm[cat]]
+        Y = [data_pat[i] for i in data_catm[cat]]
+        Z = [data_dep[i] for i in data_catm[cat]]
+        N = [Z[i]-X[i] for i in range(len(X))]
+        moy_X = sum(X)/len(X)
+        moy_Y = sum(Y)/len(Y)
+        moy_N = sum(N)/len(N)
+        for i in range(len(X)):
+            if N[i]>moy_N+0.35*(max(N)+moy_N) and N[i]>0:
+                if Y[i]<moy_Y-0.35*(moy_Y-min(Y)):
+                    V.append(1)
+                else:
+                    V.append(0)
+            else:
+                V.append(0)
+    print(sum(V))
+    return V
+
+
+def indicateur3():
+    V = []
+    for cat in range(len(cat_list)):
+        X = [data_sal[i] for i in data_catm[cat]]
+        Y = [data_pat[i] for i in data_catm[cat]]
+        Z = [data_dep[i] for i in data_catm[cat]]
+        N = [Z[i]-X[i] for i in range(len(X))]
+        quant = np.quantile(N,0.8)
+        quant2 = np.quantile(Y, 0.2)
+        for i in range(len(X)):
+            if N[i]>quant and N[i]>0:
+                if Y[i]<quant2:
+                    V.append(1)
+                else:
+                    V.append(0)
+            else:
+                V.append(0)
+    print(sum(V))
+    return V
+
+database["Indicateur 1"]=indicateur1()
+database["Indicateur 2"]=indicateur2()
+database["Indicateur 3"]=indicateur3()
+
+database.to_csv('new_data_big.tsv', sep = '\t')
