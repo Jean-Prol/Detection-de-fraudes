@@ -114,4 +114,4 @@ for n_epoch in range(6):
 
 res = pd.DataFrame(list(zip(epoch, indicateur, temps, accuracy)), columns = ['Epoch', 'Indicateur', 'Temps', 'Accuracy'])
 
-res.to_csv('res.tsv', sep = '\t')
+#res.to_csv('res.tsv', sep = '\t')

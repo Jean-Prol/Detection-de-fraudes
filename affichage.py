@@ -117,11 +117,11 @@ def affichage_indicateur1(cat):
     X = [data_sal[i] for i in data_catm[cat]]
     Y = [data_pat[i] for i in data_catm[cat]]
     Z = [data_dep[i] for i in data_catm[cat]]
-    M=[i for i in range(int(min(X)), int(max(X))+1)]
+    M = [i for i in range(int(min(X)), int(max(X))+1)]
     moy_X = sum(X)/len(X)
     moy_Y = sum(Y)/len(Y)
     fig, ax = plt.subplots()
-    ax1=plt.subplot(121)
+    ax1 = plt.subplot(121)
     ax1.scatter([moy_X for _ in range(int(min(Y)), int(max(Y)+1))], [i for i in range(int(min(Y)), int(max(Y))+1)], label="Salaire moyen")
     ax1.scatter(M, [moy_Y for _ in range(int(min(X)), int(max(X))+1)], label="Patrimoine moyen")
     ax1.scatter(X, Y)
@@ -131,7 +131,7 @@ def affichage_indicateur1(cat):
     ax1.legend()
     af1 = AnnoteFinder(X,Y,data_catm[cat], xtol=1000, ytol=1000)
     fig.canvas.mpl_connect('button_press_event', af1)
-    ax2=plt.subplot(122)
+    ax2 = plt.subplot(122)
     ax2.scatter(M,M, label="Salaire = Dépenses")
     ax2.scatter(X, Z)
     ax2.set_xlabel("Salaire")
