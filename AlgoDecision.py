@@ -27,14 +27,13 @@ def dangerosite(cat_socio_pro, fraudeur):
 
 # Equipes contient la liste des équipes de détection de fraude. Chaque vérificateur devrait faire 10 contrôles
 # Chaque équipe est une liste de couples : [id_verif : exprience] 
-# Fraudes est une liste de couples (fraudeur, dangerosité)
+# Fraudes est une liste de couples [fraudeur, dangerosité]
 
 
 
 
 def repartition_fraudes(equipes, fraudes):
     liste_fraudes = fraudes.sort(key = lambda x:x[1])
-    liste_fraudes = liste_fraudes.reverse()
     cardinal_equipe = len(equipes[0]) #On considère que les équipes ont toutes le même cardinal
     equipes = [e.sort(key = lambda x:x[1]) for e in equipes] # On trie les équipes par ordre croissant d'expérience
     Affectations = {}
@@ -53,4 +52,4 @@ def repartition_fraudes(equipes, fraudes):
     return Affectations
 
 
-    
+
