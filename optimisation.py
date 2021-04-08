@@ -6,7 +6,7 @@ from optimisation_2 import *
 # grâce à l'algo 
 ### On considère qu'on ne peut traiter que k < n cas 
 
-n = 14
+"""n = 14
 k = 10
 
 ### On suppose la liste cas rangé dans l'ordre croissant de gain_potentiel
@@ -26,6 +26,7 @@ cas = [(100, 0.9),
         (90, 0.3),
         (1700, 0.8)
         ]
+        """
 
 pas = 50
 

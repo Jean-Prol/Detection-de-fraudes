@@ -1,32 +1,29 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from final_affectation import entree
+from affectation import dangerosite
+
+
+liste_cas, équipes, nb_cas = entree() 
 
 ### on étudie n cas de fraudes dont les données seraient pour chaque cas : (gain_potentiel, probabilité de fraude) où la probabilité serait obtenu 
 # grâce à l'algo 
 ### On considère qu'on ne peut traiter que k < n cas 
 
-n = 14
-k = 10
+n = len(liste_cas)
+k = nb_cas
 
-### On suppose la liste cas rangé dans l'ordre croissant de gain_potentiel
+### On veut une liste de cas de la forme [(gain, proba, id)]
 
-cas = [(100, 0.9), 
-        (200, 0.95),
-        (600, 0.8),
-        (1000, 0.5), 
-        (1100, 0.1), 
-        (1100, 0.5),
-        (1200, 0.6), 
-        (1250, 0.4), 
-        (1600, 0.05), 
-        (100, 0.01), 
-        (70, 0.03),
-        (2000, 0.65), 
-        (90, 0.3),
-        (1700, 0.8)
-        ]
+def cas(liste = liste_cas) : 
+    cas = []
+    for mister in liste : 
+        cas.append((liste_cas[mister][2]*dangerosité(liste_cas[mister]), liste_cas[mister][3], liste_cas[mister][0]))
+    return cas
 
-pas = 50
+print(cas)
+
+
 
 ### On cherche à écrire une fonction qui donne tous les sous-ensembles de cardinal k de l'ensemble [[0, n]]
 
