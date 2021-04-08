@@ -89,8 +89,7 @@ def proba(combinaison, x, cas) :
 
         return p 
 
-#print(proba((0,1), 101, cas) )                       
-      
+
 
 for t in combinaisons : 
 
@@ -101,7 +100,7 @@ for t in combinaisons :
 
 
 print("nombre de courbes =", len(Y))
-print(danger)
+print("cas les plus dangereux :", danger)
 
 for j in range (len(Y)) : 
         plt.plot(X, Y[j])

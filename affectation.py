@@ -15,43 +15,45 @@ import numpy as np
 # On définit des fonctions qui nous seront utiles
 
 def salaire(fraudeur) : 
-    return fraudeur[0]
-
-def patrimoine(fraudeur) : 
     return fraudeur[1]
 
-def cat_socio(fraudeur) : 
+def patrimoine(fraudeur) : 
     return fraudeur[2]
+
+def cat_socio(fraudeur) : 
+    return fraudeur[4]
 
 def probabilite(fraudeur) : 
     return fraudeur[3]
 
 # Définition de l'indice de dangérosité
 
-def indice_dangerosite(cat_socio_pro, fraudeur):
-    L = Donnee[cat_socio_pro]
+def indice_dangerosite(fraudeur):
+    """L = Donnee[cat_socio(fraudeur)]
     F = fraudeur 
     Moyennes = [np.mean(d) for d in L]
     Ecart_type = [np.std(d) for d in L]
     res = [abs((F[i]-Moyennes[i])/Ecart_type[i]) for i in range(len(F))]
-    return (2/np.pi)*np.atan(max(res))
+    return (2/np.pi)*np.arctan(max(res))"""
+    return 1 
+     
 
 # définition de la dangerosité
 
 def dangerosite(fraudeur):
-    return probabilite(fraudeur)*indice_dangerosite(cat_socio_pro,fraudeur)
+    return probabilite(fraudeur)*indice_dangerosite(fraudeur)
 
 # On cherche à mesurer la difficulté d'un cas à traiter, ici simplement en terme de niveau de difficulté
 # les paramètres pouvant influer sont : la probabilité de fraude, le patrimoine, le salaire, (les indicateurs)
 
 def difficult(fraudeur) : 
-    p = probabilité(fraudeur)
+    p = probabilite(fraudeur)
     pat = patrimoine(fraudeur)
     rev = salaire(fraudeur)
     def f(x) : 
-        return 20*(x**2 - x + 0.3)
+        return 20*(x*x - x + 0.3)
     indice = pat * rev / f(p) # on considère que plus la proba est proche de 0.5 plus le dossier est délicat (forte incertitude)
-    return (2/np.pi)*np.atan(indice)
+    return (2/np.pi)*np.arctan(indice/(100000*100000)) # on divise par 100 000 * 100 000 pour "normaliser" par un produit salaire-patrioine moyen 
 
 
 
@@ -60,12 +62,12 @@ def difficult(fraudeur) :
 
 def time(fraudeur, id_verif, equipe) : 
     indice = difficult(fraudeur)/equipe[id_verif][1]
-    return (2/np.pi)*np.atan(indice)
+    return (2/np.pi)*np.arctan(indice)
 
 
 # Equipes contient la liste des équipes de détection de fraude. Chaque vérificateur devrait faire 10 contrôles
 # Chaque équipe est une liste de couples : [id_verif : exprience] 
-# Fraudes est une liste de couples [fraudeur, indice_dangerosité, difficulté]
+# Fraudes est une liste de couples [fraudeur, dangerosité, difficulté]
 
 
 
@@ -75,44 +77,44 @@ def time(fraudeur, id_verif, equipe) :
 
 # On considère que chaque personne a une capcité de difficulté maximale
 
-charge_max = 5
-cardinal_equipe = 10 #On considère que les équipes ont toutes le même cardinal
+"""charge_max = 5
+cardinal_equipe = 10 #On considère que les équipes ont toutes le même cardinal"""
 
 
-def repartition_difficult(equipes, fraudes) : 
-    liste_fraudes = fraudes.sort(key = lambda x:x[1])
-    equipes = [e.sort(key = lambda x:x[1], reverse = True) for e in equipes] # On trie les équipes par ordre décroissant d'expérience
+def repartition_difficult(equipes, fraudes, cardinal_equipe = 10, charge_max = 5) : #charge_max à 5 : totalement arbitraire
+    fraudes.sort(key = lambda x:x[1])
+    for e in equipes : 
+        e.sort(key = lambda x: x[1], reverse = True)    # On trie les équipes par ordre décroissant d'expérience
     Affectations = {}
 
     for k in range(cardinal_equipe) : 
-        lnext = [e[k] for e in equipes] # on prend les k eme plus expérimentés éléments de chaque équipe
-        while len(lnext) > 0 :
+        lnext = [e[k][0] for e in equipes] # on prend les k eme plus expérimentés éléments de chaque équipe
+        while len(lnext) > 0 and len(fraudes) > 0 :
             for e in equipes : 
 
-                if e[k][0] in lnext : 
+                if e[k][0] in lnext and len(fraudes) > 0 : 
 
                     id_verif = e[k][0] 
 
                     if id_verif not in Affectations : 
-                        case = liste_fraudes.pop()
-                        Affectations[id_verif] = (case, case[2])  # on affecte à une personne un cas et une charge de travail
+                        case = fraudes.pop()
+                        Affectations[id_verif] = ([case], case[2])  # on affecte à une personne un cas et une charge de travail
             
                     else : 
                         
                         # on va chercher à savoir si le vérificateur a encore une capacité suffisante de travail et on lui attribue le cas le plus 
-                        # difficile possible
+                        # dangereux possible
                         
-                        d = len(liste_fraudes)
+                        d = len(fraudes)
                         a = d-1
                         cap = charge_max - Affectations[id_verif][1]
-                        while a >= 0 and liste_fraudes[a][2] > cap : 
+                        while a >= 0 and fraudes[a][2] > cap : 
                             a -= 1                         
                         if a >= 0 : 
-                            case = liste_fraudes.pop(a)
-                            Affectations[id_verif] = (case, case[2])
+                            case = fraudes.pop(a)
+                            Affectations[id_verif] = (Affectations[id_verif][0] + [case], Affectations[id_verif][1] + case[2])
                         else : 
                             lnext.remove(id_verif)
-
-    
+       
     return Affectations
 

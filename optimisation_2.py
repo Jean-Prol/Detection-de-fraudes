@@ -42,7 +42,7 @@ def sous_ensemble(k, n) :
                                         M.append(l+[j])
         return M 
 
-#### L'objectif est de trouver une alternative à notre fonction sous_ensemble pour ne pas avoir à tracer les k parmi n courbes et ainsi 
+### L'objectif est de trouver une alternative à notre fonction sous_ensemble pour ne pas avoir à tracer les k parmi n courbes et ainsi 
 ### diminué la complexité de manière conséquente 
 
 ## on peut trier notre liste de cas dans l'ordre décroissant sur le critère des probabilité de gain puis par gain 
