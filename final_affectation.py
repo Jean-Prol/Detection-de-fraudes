@@ -1,5 +1,5 @@
 from affectation import repartition_difficult, dangerosite, difficult
-from optimisation import * 
+"""from optimisation import * """
 from tkinter import *
 
 
@@ -14,7 +14,8 @@ from tkinter import *
 
     ###Le dictionnaire de nos cas à traiter
 
-nb_cas = 8
+#nb_cas = int(float(entrée1.get()))
+
 
 liste_cas = { "Mister_1" : [1, 100000, 100000, 0.95, 1],
                 "Mister_2" : [2, 200000, 100000, 0.85, 2],
@@ -39,8 +40,8 @@ Equipes = {"equipe 1" : [(11, 3), (12, 1)],
             [(21, 2), (22, 2)]]
     ### on définit la fonction qui nous donne l'ensemble des entréres du problème
 
-def entree() : 
-    return liste_cas, équipes, nb_cas
+def entree(ent) : 
+    return liste_cas, équipes, int(float(ent.get())) 
 
     ### on définit la fonction qui nous donne le choix des équipes. La fontction retourne un sous-dicionnaire de liste_cas. 
 
@@ -67,7 +68,6 @@ def repartition(cas = choix_des_cas(), teams = équipes) :
 
     return Affectations
 
-print(repartition())
 
     ### on définit une fonction qui nous donnera les résultats 
 
@@ -81,27 +81,170 @@ def statistiques() :
 
 ### AFFICHAGE 
 
-fenetre = Tk()
+# fonctions 
 
-# Ajout d'un texte dans la fenêtre :
+def changeText() : 
+
+    # récupération des entrées : 
+    nb_entree = entrée1.get()
+    nb_target = entrée2.get()
+    nb_ent = int(float(nb_entree))
+    nb_target = int(float(nb_target))
+
+    # ouverture d'une nouvelle fenêtre
+    fenetre_2 = Tk()
+    fenetre_2.geometry('500x500')
+
+    # Ajout d'un texte dans la fenêtre pour demander le nombre de cas à traiter :
+    texte3 = Label (fenetre_2, text = "youpi ")
+    texte3.pack()    
+
+    # Affichage de la fenêtre créée :
+    fenetre_2.mainloop()
+
+
+
+
+
+# ouverture de la fenêtre
+fenetre = Tk()
+fenetre.geometry('500x500')
+
+# Ajout d'un texte dans la fenêtre pour indiquer le nombre de cas à traiter :
+nb = str(len(liste_cas))
+texte1 = Label (fenetre, text = "Nous avons "+nb+" cas à traiter actuellement")
+texte1.pack()
+
+# Ajout d'un texte dans la fenêtre pour demander le nombre de cas à traiter :
 texte1 = Label (fenetre, text = "Indiquez le nombre de cas que vous souhaitez traiter :")
 texte1.pack()
 
-# Création d'un champ de saisie de l'utilisateur dans la fenêtre pour on verra hein :
-entrée1 = Entry (fenetre)
+# Création d'un champ de saisie de l'utilisateur dans la fenêtre pour saisir le nombre de cas souhaité :
+
+def verifie(*args):
+    entry = entrée1.get().strip()
+    entry_2 = entrée2.get().strip()
+    entry_3 = entrée3.get().strip()
+
+    if entry.isdigit() and entry_2.isdigit() and int(float(entry)) <= int(float(nb)) and int(float(entry_2)) <= montant(liste_cas) and entry_3.isdigit() and int(float(entry_3)) <= 100:
+        label.configure(text='')
+        bouton1.configure(state="active")
+    elif entry.isdigit() and  int(float(entry)) <= int(float(nb)) : 
+        label.configure(text = '')
+    elif entry.isdigit() and int(float(entry)) > int(float(nb)):
+        label.configure(text="Vous ne pouvez pas traiter autant de cas")
+        bouton1.configure(state="disabled")
+    elif not entry.isdigit():
+        label.configure(text="Renseignez un nombre svp")
+        bouton1.configure(state="disabled")       
+
+entry_var = StringVar("")
+entry_var.trace('w', verifie)
+entrée1 = Entry (fenetre, textvariable = entry_var)
 entrée1.pack()
+label = Label(fenetre, text="", foreground="red")
+label.pack()
+
+# Ajout d'un texte dans la fenêtre pour demander la façon dont on veut répartir les cas :
+texte2 = Label (fenetre, text = "Indiquez la manière dont vous souhaitez répartir les cas à vos équipes")
+texte2.pack()
 
 # Création des cases à cocher dans la fenêtre pour choisir la manière de répartir les cas :
-case_cocher1 = Checkbutton (fenetre, text = "équilibrée")
-case_cocher2 = Checkbutton (fenetre, text = "optimisée")
-case_cocher3 = Checkbutton (fenetre, text = "hybride")
+
+def active_function(index):
+    if case_var[index][1].get()==0:
+        reset_bouton()
+    else:
+        for i in range(len(case_var)):
+            if i!= index:
+                case_var[i][0].configure(state="disabled")
+
+def reset_bouton():
+    for i in range(len(case_var)):
+        case_var[i][0].configure(state="active")
+        case_var[i][1].set(0)
+
+case_var1 = IntVar()
+case_var2 = IntVar()
+case_var3 = IntVar()
+case_cocher1 = Checkbutton (fenetre, text = "équilibrée", variable = case_var1, command = lambda:active_function((0)))
+case_cocher2 = Checkbutton (fenetre, text = "optimisée", variable = case_var2, command = lambda:active_function((1)))
+case_cocher3 = Checkbutton (fenetre, text = "hybride", variable = case_var3, command = lambda:active_function((2)))
 case_cocher1.pack()
 case_cocher2.pack()
 case_cocher3.pack()
+case_var = [[case_cocher1, case_var1], [case_cocher2, case_var2], [case_cocher3, case_var3]]
+
+# Ajout d'un texte dans la fenêtre pour annoncer le montant maximal possible :
+def montant(l) : 
+    S = 0
+    for mister in l : 
+        S += liste_cas[mister][2]*dangerosite(liste_cas[mister])
+    
+    return S
+
+montant_max = str(montant(liste_cas))
+texte1 = Label (fenetre, text = "Le montant maximal estimé à récupérer est de "+montant_max+" €")
+texte1.pack()
+
+# Ajout d'un texte dans la fenêtre pour demander le montant minimal objectif de l'équipe :
+texte1 = Label (fenetre, text = "Saisissez le montant objectif de votre équipe puis le taux de réussite minimal souhaité :")
+texte1.pack()
+
+# Création d'un champ de saisie de l'utilisateur dans la fenêtre pour saisir le montant objectif souhaiter :
+def verifie_2(*args):
+    entry = entrée1.get().strip()
+    entry_2 = entrée2.get().strip()
+    entry_3 = entrée3.get().strip()
+
+    if entry.isdigit() and entry_2.isdigit() and int(float(entry_2)) <= montant(liste_cas) and int(float(entry)) <= int(float(nb)) and entry_3.isdigit() and int(float(entry_3)) <= 100:
+        label_2.configure(text='')
+        bouton1.configure(state="active")
+    elif entry_2.isdigit() and int(float(entry_2)) <= montant(liste_cas) : 
+        label_2.configure(text='')
+    elif entry_2.isdigit() and int(float(entry_2)) > montant(liste_cas) : 
+        label_2.configure(text="Renseignez un montant inférieur au montant maximal svp")
+        bouton1.configure(state="disabled")    
+    elif not entry_2.isdigit():
+        label_2.configure(text="Renseignez un nombre svp")
+        bouton1.configure(state="disabled")       
+
+entry_var_2 = StringVar("")
+entry_var_2.trace('w', verifie_2)
+entrée2 = Entry (fenetre, textvariable = entry_var_2)
+entrée2.pack()
+label_2 = Label(fenetre, text="", foreground="red")
+label_2.pack()
+
+# Création d'un champ de saisie de l'utilisateur dans la fenêtre pour donner un taux de réussite minimum souhaité :
+def verifie_3(*args):
+    entry = entrée1.get().strip()
+    entry_2 = entrée2.get().strip()
+    entry_3 = entrée3.get().strip()
+
+    if entry.isdigit() and entry_2.isdigit() and entry_3.isdigit() and int(float(entry_3)) <= 100 and int(float(entry_2)) <= montant(liste_cas) and int(float(entry)) <= int(float(nb)):
+        label_3.configure(text='')
+        bouton1.configure(state="active")
+    elif entry_3.isdigit() and int(float(entry_3)) <= 100 : 
+        label_3.configure(text='') 
+    elif entry_2.isdigit() and int(float(entry_2)) > 100 : 
+        label_3.configure(text="Renseignez un taux inférieur à 100% svp")
+        bouton1.configure(state="disabled")    
+    elif not entry_2.isdigit():
+        label_3.configure(text="Renseignez un nombre svp")
+        bouton1.configure(state="disabled")       
+
+entry_var_3 = StringVar("")
+entry_var_3.trace('w', verifie_3)
+entrée3 = Entry (fenetre, textvariable = entry_var_3)
+entrée3.pack()
+label_3 = Label(fenetre, text="", foreground="red")
+label_3.pack()
 
 # Ajout d'un bouton dans la fenêtre :
-bouton1 = Button (fenetre, text = "Valider mes choix")
+bouton1 = Button (fenetre, text = "Valider mes choix", command=lambda: changeText())
 bouton1.pack()
+bouton1.configure(state='disabled')
 
 
 
