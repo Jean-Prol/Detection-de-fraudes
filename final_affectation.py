@@ -1,4 +1,5 @@
 from affectation import repartition_difficult, dangerosite, difficult
+from optimisation_2 import nouveau 
 """from optimisation import * """
 from tkinter import *
 
@@ -38,29 +39,42 @@ Equipes = {"equipe 1" : [(11, 3), (12, 1)],
 
 équipes = [[(11, 3), (12, 1)],
             [(21, 2), (22, 2)]]
-    ### on définit la fonction qui nous donne l'ensemble des entréres du problème
+    ### on définit la fonction qui nous donne l'ensemble des entréres du problème : liste des cas, équipes, nb de cas à traiter, 
+    ### montant visé, taux de réussite minimal espérer 
 
-def entree(ent) : 
-    return liste_cas, équipes, int(float(ent.get())) 
+def entree(ent1, ent2, ent3) : 
+    return liste_cas, équipes, int(float(ent1.get())), int(float(ent2.get())), int(float(ent3.get()))/100
 
-    ### on définit la fonction qui nous donne le choix des équipes. La fontction retourne un sous-dicionnaire de liste_cas. 
+    ### on définit la fonction qui nous donne le choix des équipes. La fontction retourne un sous-dicionnaire de liste_cas et une 
+    ### chaîne de caractère qui liste les dangers pour le moement
 
-def choix_des_cas(liste = liste_cas) : 
-    
+def choix_des_cas(liste = liste_cas, k = len(liste_cas)) : 
+    danger = nouveau(liste, k)[0]
+    sous_dico = {}
+    txt = ""
+    for cas in danger : 
+        txt += str(cas[2])+ ", "
 
-    return liste
+    # on reconstruit le sous-dico de liste_cas dont nous avons besoin
+    for cas in danger : 
+        id = cas[2]
+        for case in liste_cas : 
+            if liste_cas[case][0] == id : 
+                sous_dico[case] = liste_cas[case]
+            
+    return sous_dico, txt
 
 
 
     ### on définit la fonction qui nous donne la répartition des équipes 
 
-def repartition(cas = choix_des_cas(), teams = équipes) : 
+def repartition(cas = choix_des_cas()[0], teams = équipes) : 
 
     repartitions = { ekip : {verif : [] for verif in Equipes[ekip]} for ekip in Equipes}
     
     # On a un dictionaire cas qu'on veut transformer en une liste pour utiliser la fonction repartition_difficult
     fraude = [[cas[mister][0], dangerosite(cas[mister]), difficult(cas[mister])] for mister in cas]
-    Affectations = repartition_difficult(teams, fraude, 2, 3)
+    Affectations = repartition_difficult(teams, fraude, 2, 1)
 
     # On donne à chaque verificateur une liste de personne, ça ne doit pas être trop dur en sql  : 
     """repartitions ... """
@@ -95,9 +109,20 @@ def changeText() :
     fenetre_2 = Tk()
     fenetre_2.geometry('500x500')
 
-    # Ajout d'un texte dans la fenêtre pour demander le nombre de cas à traiter :
-    texte3 = Label (fenetre_2, text = "youpi ")
+    # Ajout d'un texte dans la fenêtre pour rien pour le moment :
+    blabla = choix_des_cas(liste_cas, nb_ent)[1]
+    texte3 = Label (fenetre_2, text = "Les identifiants des personnes les plus dangereuses sont : "+blabla)
     texte3.pack()    
+
+    # Ajout d'un texte dans la fenêtre pour rien pour le moment :
+    Affectations = repartition(choix_des_cas(liste_cas, nb_ent)[0], équipes)
+    final = ""
+    for affectation in Affectations : 
+        final += "\n"+str(affectation)+" : "
+        for case in Affectations[affectation][0]:
+            final += str(case[0])+ " "
+    texte4 = Label (fenetre_2, text = "La répartition se fera de la manière suivante : "+final)
+    texte4.pack() 
 
     # Affichage de la fenêtre créée :
     fenetre_2.mainloop()
@@ -112,7 +137,7 @@ fenetre.geometry('500x500')
 
 # Ajout d'un texte dans la fenêtre pour indiquer le nombre de cas à traiter :
 nb = str(len(liste_cas))
-texte1 = Label (fenetre, text = "Nous avons "+nb+" cas à traiter actuellement")
+texte1 = Label (fenetre, text = "Nous avons au total "+nb+" cas à traiter actuellement")
 texte1.pack()
 
 # Ajout d'un texte dans la fenêtre pour demander le nombre de cas à traiter :
@@ -184,11 +209,11 @@ def montant(l) :
     return S
 
 montant_max = str(montant(liste_cas))
-texte1 = Label (fenetre, text = "Le montant maximal estimé à récupérer est de "+montant_max+" €")
+texte1 = Label (fenetre, text = "\nLe montant maximal estimé à récupérer est de "+montant_max+" €")
 texte1.pack()
 
 # Ajout d'un texte dans la fenêtre pour demander le montant minimal objectif de l'équipe :
-texte1 = Label (fenetre, text = "Saisissez le montant objectif de votre équipe puis le taux de réussite minimal souhaité :")
+texte1 = Label (fenetre, text = "Saisissez le montant objectif de votre équipe :")
 texte1.pack()
 
 # Création d'un champ de saisie de l'utilisateur dans la fenêtre pour saisir le montant objectif souhaiter :
@@ -215,6 +240,10 @@ entrée2 = Entry (fenetre, textvariable = entry_var_2)
 entrée2.pack()
 label_2 = Label(fenetre, text="", foreground="red")
 label_2.pack()
+
+# Ajout d'un texte dans la fenêtre pour demander le taux de réussite minimum souhaité :
+texte1 = Label (fenetre, text = "Saisissez le  taux de réussite minimum souhaité par vos équipes :")
+texte1.pack()
 
 # Création d'un champ de saisie de l'utilisateur dans la fenêtre pour donner un taux de réussite minimum souhaité :
 def verifie_3(*args):

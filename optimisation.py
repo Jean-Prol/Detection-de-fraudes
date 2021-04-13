@@ -28,7 +28,7 @@ cas = [(100, 0.9),
         ]
         """
 
-pas = 50
+pas = 100
 
 danger, neg, cas, n, k = nouveau()
 

@@ -26,6 +26,15 @@ def cat_socio(fraudeur) :
 def probabilite(fraudeur) : 
     return fraudeur[3]
 
+def Donnee(dico) : 
+    donnee = [[] for i in range (3)] 
+    for mister in dico :
+        fraudeur = dico[mister]
+        cat = cat_socio(fraudeur)
+        donnee[cat][0]
+        
+
+
 # Définition de l'indice de dangérosité
 
 def indice_dangerosite(fraudeur):
@@ -35,7 +44,7 @@ def indice_dangerosite(fraudeur):
     Ecart_type = [np.std(d) for d in L]
     res = [abs((F[i]-Moyennes[i])/Ecart_type[i]) for i in range(len(F))]
     return (2/np.pi)*np.arctan(max(res))"""
-    return 1 
+    return 1
      
 
 # définition de la dangerosité
