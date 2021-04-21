@@ -27,30 +27,32 @@ def probabilite(fraudeur) :
     return fraudeur[3]
 
 def Donnee(dico) : 
-    donnee = [[] for i in range (3)] 
+    donnee = [[[], []] for i in range (3)] 
     for mister in dico :
         fraudeur = dico[mister]
         cat = cat_socio(fraudeur)
-        donnee[cat][0]
-        
+        donnee[cat][0].append(fraudeur[1])
+        donnee[cat][1].append(fraudeur[2])
+    return donnee
 
 
 # Définition de l'indice de dangérosité
 
-def indice_dangerosite(fraudeur):
-    """L = Donnee[cat_socio(fraudeur)]
+def indice_dangerosite(fraudeur, dico):
+    donnee = Donnee(dico)
+    L = donnee[cat_socio(fraudeur)]
     F = fraudeur 
     Moyennes = [np.mean(d) for d in L]
     Ecart_type = [np.std(d) for d in L]
-    res = [abs((F[i]-Moyennes[i])/Ecart_type[i]) for i in range(len(F))]
-    return (2/np.pi)*np.arctan(max(res))"""
-    return 1
+    res = [abs((F[i]-Moyennes[i])/Ecart_type[i]) for i in range(len(L))]
+    return (2/np.pi)*np.arctan(max(res))
+    """    return 1"""
      
 
 # définition de la dangerosité
 
-def dangerosite(fraudeur):
-    return probabilite(fraudeur)*indice_dangerosite(fraudeur)
+def dangerosite(fraudeur, dico):
+    return probabilite(fraudeur)*indice_dangerosite(fraudeur, dico)
 
 # On cherche à mesurer la difficulté d'un cas à traiter, ici simplement en terme de niveau de difficulté
 # les paramètres pouvant influer sont : la probabilité de fraude, le patrimoine, le salaire, (les indicateurs)
@@ -127,3 +129,63 @@ def repartition_difficult(equipes, fraudes, cardinal_equipe = 10, charge_max = 5
        
     return Affectations
 
+
+
+# On cherche maintenant un algo qui répartie de manièere équilibrée les équipes 
+
+def repartition_equilibre(equipes, fraudes, cardinal_equipe = 10, charge_max = 5) : #charge_max à 5 : totalement arbitraire
+    fraudes.sort(key = lambda x:x[2])
+    Affectations = {}
+
+    lnext = []
+    for i in range (len(equipes)) : 
+        for verif in equipes[i] : 
+            lnext.append((verif, 0))     # 0 correspond à la charge de travail de verif, on initialise à 0
+
+
+    while len(lnext) > 0 and len(fraudes) > 0 :
+
+        lnext.sort(key= lambda x:x[1], reverse = True)
+        e = lnext.pop()
+        id_verif = e[0][0]
+
+                
+        if id_verif not in Affectations : 
+            case = fraudes.pop()
+            Affectations[id_verif] = ([case], case[2])  # on affecte à une personne un cas et une charge de travail
+            e = e[0], e[1] + case[2]
+            lnext.append(e)
+            
+        else : 
+                        
+                    # on va chercher à savoir si le vérificateur a encore une capacité suffisante de travail et on lui attribue le cas le plus 
+                    # dangereux possible
+                        
+            d = len(fraudes)
+            a = d-1
+            cap = charge_max - Affectations[id_verif][1]
+            while a >= 0 and fraudes[a][2] > cap : 
+                a -= 1                         
+            if a >= 0 : 
+                case = fraudes.pop(a)
+                Affectations[id_verif] = (Affectations[id_verif][0] + [case], Affectations[id_verif][1] + case[2])
+                e = e[0], e[1] + case[2]
+                lnext.append(e)
+    
+    print(Affectations)
+       
+    return Affectations
+
+
+
+# on ecrit un algorithme qui distribue les cas de manière optimisée tout en permettant aux personnes moins experimentée d'obtenir des cas 
+# plus difficile pour leur permettre de progresser
+
+def repartition_hybride(equipes, fraudes, cardinal_equipe = 10, charge_max = 5) : #charge_max à 5 : totalement arbitraire
+
+    fraudes.sort(key = lambda x:x[2])
+    Affectations = {}
+
+    # à faire et en cours....
+
+    return Affectations

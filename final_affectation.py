@@ -1,4 +1,4 @@
-from affectation import repartition_difficult, dangerosite, difficult
+from affectation import repartition_difficult, repartition_equilibre, dangerosite, difficult
 from optimisation_2 import nouveau 
 """from optimisation import * """
 from tkinter import *
@@ -37,8 +37,8 @@ Equipes = {"equipe 1" : [(11, 3), (12, 1)],
             "equipe 2" : [(21, 2), (22, 2)]
             }
 
-équipes = [[(11, 3), (12, 1)],
-            [(21, 2), (22, 2)]]
+#équipes = [[(11, 3), (12, 1)],
+#            [(21, 2), (22, 2)]]
     ### on définit la fonction qui nous donne l'ensemble des entréres du problème : liste des cas, équipes, nb de cas à traiter, 
     ### montant visé, taux de réussite minimal espérer 
 
@@ -68,22 +68,31 @@ def choix_des_cas(liste = liste_cas, k = len(liste_cas)) :
 
     ### on définit la fonction qui nous donne la répartition des équipes 
 
-def repartition(cas = choix_des_cas()[0], teams = équipes) : 
+def repartition(cas = choix_des_cas()[0], teams = Equipes, index=0) : 
 
-    repartitions = { ekip : {verif : [] for verif in Equipes[ekip]} for ekip in Equipes}
+    repartitions = { ekip : {verif : [] for verif in teams[ekip]} for ekip in teams}
     
     # On a un dictionaire cas qu'on veut transformer en une liste pour utiliser la fonction repartition_difficult
-    fraude = [[cas[mister][0], dangerosite(cas[mister]), difficult(cas[mister])] for mister in cas]
-    Affectations = repartition_difficult(teams, fraude, 2, 1)
-
-    # On donne à chaque verificateur une liste de personne, ça ne doit pas être trop dur en sql  : 
+    if index == 0 : 
+        fraude = [[cas[mister][0], dangerosite(cas[mister], cas), difficult(cas[mister])] for mister in cas]
+        equipes = [teams[ekip] for ekip in teams]
+        Affectations = repartition_equilibre(equipes, fraude, 2, 1)
+    elif index == 1 :
+        fraude = [[cas[mister][0], dangerosite(cas[mister], cas), difficult(cas[mister])] for mister in cas]
+        equipes = [teams[ekip] for ekip in teams]
+        Affectations = repartition_difficult(equipes, fraude, 2, 1)
+    else : 
+        fraude = [[cas[mister][0], dangerosite(cas[mister], cas), difficult(cas[mister])] for mister in cas]
+        equipes = [teams[ekip] for ekip in teams]
+        Affectations = repartition_hybride(equipes, fraude, 2, 1)
+    # On donne à chaque verificateur une liste de personne, ça ne doit pas être trop dur on verra : 
     """repartitions ... """
             
 
     return Affectations
 
 
-    ### on définit une fonction qui nous donnera les résultats 
+    ### on définit une fonction qui nous donnera les résultats statistiques
 
 def statistiques() : 
 
@@ -100,10 +109,16 @@ def statistiques() :
 def changeText() : 
 
     # récupération des entrées : 
+
     nb_entree = entrée1.get()
     nb_target = entrée2.get()
     nb_ent = int(float(nb_entree))
     nb_target = int(float(nb_target))
+    # on recupere le bouton qui a ete coche 
+    i= 0 
+    while case_var[i][1].get() == 0 : 
+        i += 1
+
 
     # ouverture d'une nouvelle fenêtre
     fenetre_2 = Tk()
@@ -115,7 +130,7 @@ def changeText() :
     texte3.pack()    
 
     # Ajout d'un texte dans la fenêtre pour rien pour le moment :
-    Affectations = repartition(choix_des_cas(liste_cas, nb_ent)[0], équipes)
+    Affectations = repartition(choix_des_cas(liste_cas, nb_ent)[0], Equipes, i)
     final = ""
     for affectation in Affectations : 
         final += "\n"+str(affectation)+" : "
@@ -204,7 +219,7 @@ case_var = [[case_cocher1, case_var1], [case_cocher2, case_var2], [case_cocher3,
 def montant(l) : 
     S = 0
     for mister in l : 
-        S += liste_cas[mister][2]*dangerosite(liste_cas[mister])
+        S += liste_cas[mister][2]*dangerosite(liste_cas[mister], l)
     
     return S
 
@@ -213,7 +228,7 @@ texte1 = Label (fenetre, text = "\nLe montant maximal estimé à récupérer est
 texte1.pack()
 
 # Ajout d'un texte dans la fenêtre pour demander le montant minimal objectif de l'équipe :
-texte1 = Label (fenetre, text = "Saisissez le montant objectif de votre équipe :")
+texte1 = Label (fenetre, text = "Saisissez le montant objectif de votre équipe en € :")
 texte1.pack()
 
 # Création d'un champ de saisie de l'utilisateur dans la fenêtre pour saisir le montant objectif souhaiter :
@@ -256,10 +271,10 @@ def verifie_3(*args):
         bouton1.configure(state="active")
     elif entry_3.isdigit() and int(float(entry_3)) <= 100 : 
         label_3.configure(text='') 
-    elif entry_2.isdigit() and int(float(entry_2)) > 100 : 
+    elif entry_3.isdigit() and int(float(entry_3)) > 100 : 
         label_3.configure(text="Renseignez un taux inférieur à 100% svp")
         bouton1.configure(state="disabled")    
-    elif not entry_2.isdigit():
+    elif not entry_3.isdigit():
         label_3.configure(text="Renseignez un nombre svp")
         bouton1.configure(state="disabled")       
 
