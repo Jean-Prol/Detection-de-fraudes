@@ -13,7 +13,7 @@ from affectation import dangerosite
 def cas(liste) : 
     cas = []
     for mister in liste : 
-        cas.append((liste[mister][2]*dangerosite(liste[mister]), liste[mister][3], liste[mister][0]))
+        cas.append((liste[mister][2]*dangerosite(liste[mister], liste), liste[mister][3], liste[mister][0]))
     return cas
 
 

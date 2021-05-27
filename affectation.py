@@ -1,5 +1,5 @@
 from math import *
-import random
+from random import randint
 import numpy as np
 
 
@@ -172,7 +172,6 @@ def repartition_equilibre(equipes, fraudes, cardinal_equipe = 10, charge_max = 5
                 e = e[0], e[1] + case[2]
                 lnext.append(e)
     
-    print(Affectations)
        
     return Affectations
 
@@ -181,11 +180,55 @@ def repartition_equilibre(equipes, fraudes, cardinal_equipe = 10, charge_max = 5
 # on ecrit un algorithme qui distribue les cas de manière optimisée tout en permettant aux personnes moins experimentée d'obtenir des cas 
 # plus difficile pour leur permettre de progresser
 
-def repartition_hybride(equipes, fraudes, cardinal_equipe = 10, charge_max = 5) : #charge_max à 5 : totalement arbitraire
+def repartition_hybride(equipes, fraudes, cardinal_equipe = 10, charge_max = 1.4) : #charge_max à 5 : totalement arbitraire
 
-    fraudes.sort(key = lambda x:x[2])
+    fraudes.sort(key = lambda x:x[1])
+    for e in equipes : 
+        e.sort(key = lambda x: x[1], reverse = True)    # On trie les équipes par ordre décroissant d'expérience
     Affectations = {}
 
-    # à faire et en cours....
+    # on définit la matrice de tirage
+    mat = [[0 for i in range (cardinal_equipe)] for j in range (len(equipes))]
+
+    for k in range(cardinal_equipe) : 
+        lnext = [e[k][0] for e in equipes] # on prend les k eme plus expérimentés éléments de chaque équipe
+        while len(lnext) > 0 and len(fraudes) > 0 :
+            for e in equipes : 
+
+                if e[k][0] in lnext and len(fraudes) > 0 : 
+
+                    id_verif = e[k][0] 
+
+                    if id_verif not in Affectations : 
+                        case = fraudes.pop()
+                        Affectations[id_verif] = ([case], case[2])  # on affecte à une personne un cas et une charge de travail
+            
+                    else : 
+                        
+                        # on va chercher à savoir si le vérificateur a encore une capacité suffisante de travail et on lui attribue le cas le plus 
+                        # dangereux possible
+                        
+                        d = len(fraudes)
+                        a = d-1
+                        cap = charge_max - Affectations[id_verif][1]
+                        while a >= 0 and fraudes[a][2] > cap : 
+                            a -= 1                         
+                        if a >= 0 : 
+                            case = fraudes.pop(a)
+                            Affectations[id_verif] = (Affectations[id_verif][0] + [case], Affectations[id_verif][1] + case[2])
+                        else : 
+                            lnext.remove(id_verif)
+
+            # on donne un cas à qqn qui n'est pas dans lnext s'il n'en a pas encore bénéficier
+            if k < cardinal_equipe-1 : 
+
+                n1 = randint(0, len(equipes) - 1)
+                n2 = randint(k+1, cardinal_equipe-1)
+
+                
+                if mat[n1][n2] == 0 : 
+                    case = fraudes.pop()
+                    Affectations[equipes[n1][n2][0]] = ([case], case[2])
+                    mat[n1][n2] = 1 
 
     return Affectations

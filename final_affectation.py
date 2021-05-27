@@ -1,6 +1,6 @@
-from affectation import repartition_difficult, repartition_equilibre, dangerosite, difficult
-from optimisation_2 import nouveau 
-"""from optimisation import * """
+from affectation import repartition_difficult, repartition_equilibre, repartition_hybride, dangerosite, difficult
+from optimisation_2 import nouveau, cas 
+import tkinter
 from tkinter import *
 
 
@@ -42,8 +42,8 @@ Equipes = {"equipe 1" : [(11, 3), (12, 1)],
     ### on définit la fonction qui nous donne l'ensemble des entréres du problème : liste des cas, équipes, nb de cas à traiter, 
     ### montant visé, taux de réussite minimal espérer 
 
-def entree(ent1, ent2, ent3) : 
-    return liste_cas, équipes, int(float(ent1.get())), int(float(ent2.get())), int(float(ent3.get()))/100
+"""def entree(ent1, ent2, ent3) : 
+    return liste_cas, équipes, int(float(ent1.get())), int(float(ent2.get())), int(float(ent3.get()))/100"""
 
     ### on définit la fonction qui nous donne le choix des équipes. La fontction retourne un sous-dicionnaire de liste_cas et une 
     ### chaîne de caractère qui liste les dangers pour le moement
@@ -94,9 +94,73 @@ def repartition(cas = choix_des_cas()[0], teams = Equipes, index=0) :
 
     ### on définit une fonction qui nous donnera les résultats statistiques
 
-def statistiques() : 
+def statistiques(cas = cas(choix_des_cas()[0])) : 
 
-    return 
+    def sous_ensemble(k, n) : 
+        if k == 1 : 
+            return [[i] for i in range (0, n+1)]
+        else : 
+            L = sous_ensemble(k-1, n)
+            M = []
+            for l in L : 
+                for j in range (0, n+1) : 
+                    if (j not in l and j > max(l)): 
+                        M.append(l+[j])
+        return M 
+
+    ### Ecrire une fonction qui étant donné une combinaison, la liste des cas et un entier x, donne la probabilité que le gain potentiel associé à cette combinaison 
+    ### soit >= à x 
+
+    def proba(x, cas) : 
+        n = len(cas)
+        p = 0
+
+        for j in range (1, n+1) :
+            L = sous_ensemble(j, n-1)
+            for l in L : 
+                S = 0 
+                u = 1
+                for i in l : 
+                    S += cas[i][0]
+
+                    if S >= x : 
+                        M = [w for w in l]
+                        for i in range(n) : 
+                            if i in M : 
+                                u *= cas[i][1]
+                            else : 
+                                u *= (1 - cas[i][1])
+                        p += u
+
+        return p 
+
+    pas = 100
+
+    tot = 0 
+
+    for j in range (0, len(cas)) : 
+            tot += cas[j][0]
+
+    total = int(tot/pas)
+
+    X = [(i * pas) for i in range (total + 1 )] 
+
+    Y = [] 
+
+   
+    for i in X : 
+        p = proba(i, cas)
+        Y.append(p)
+
+    print("cas les plus dangereux :", danger)
+
+    plt.plot(X, Y)
+
+
+    plt.show()
+
+
+            
 
 
 
@@ -138,6 +202,7 @@ def changeText() :
             final += str(case[0])+ " "
     texte4 = Label (fenetre_2, text = "La répartition se fera de la manière suivante : "+final)
     texte4.pack() 
+
 
     # Affichage de la fenêtre créée :
     fenetre_2.mainloop()
@@ -257,7 +322,7 @@ label_2 = Label(fenetre, text="", foreground="red")
 label_2.pack()
 
 # Ajout d'un texte dans la fenêtre pour demander le taux de réussite minimum souhaité :
-texte1 = Label (fenetre, text = "Saisissez le  taux de réussite minimum souhaité par vos équipes :")
+texte1 = Label (fenetre, text = "Saisissez le  taux de réussite minimum souhaité par vos équipes (en %) :")
 texte1.pack()
 
 # Création d'un champ de saisie de l'utilisateur dans la fenêtre pour donner un taux de réussite minimum souhaité :
